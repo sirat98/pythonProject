@@ -5,21 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waste Classification</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; margin: 40px; background-color:'blue'}
+        body { 
+            text-align: center; 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: blue; 
+            color: white;
+        }
         img { max-width: 300px; margin-top: 10px; }
         input { margin-top: 10px; }
+        #loading { display: none; font-size: 18px; color: yellow; }
     </style>
 </head>
 <body>
     <h2>Waste Classification System</h2>
-    <form action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" name="file" required>
         <button type="submit">Upload & Classify</button>
     </form>
 
-    {% if img_path %}
-        <h3>Prediction: {{ result }}</h3>
-        <img src="{{ img_path }}" alt="Uploaded Image">
-    {% endif %}
+    <p id="loading">Processing...</p>
+    <h3 id="prediction"></h3>
+    <img id="uploadedImage" src="" alt="Uploaded Image" style="display: none;">
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent form from reloading page
+            
+            const fileInput = document.getElementById("fileInput");
+            if (fileInput.files.length === 0) {
+                alert("Please select a file!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const loadingText = document.getElementById("loading");
+            const predictionText = document.getElementById("prediction");
+            const uploadedImage = document.getElementById("uploadedImage");
+
+            loadingText.style.display = "block"; // Show loading text
+            predictionText.innerText = "";
+            uploadedImage.style.display = "none";
+
+            try {
+                const response = await fetch("https://wasteclassification.onrender.com/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json(); // Assuming backend returns JSON
+                loadingText.style.display = "none";
+
+                if (data.success) {
+                    predictionText.innerText = `Prediction: ${data.result}`;
+                    uploadedImage.src = URL.createObjectURL(fileInput.files[0]);
+                    uploadedImage.style.display = "block";
+                } else {
+                    predictionText.innerText = "Error: Unable to classify.";
+                }
+            } catch (error) {
+                loadingText.style.display = "none";
+                predictionText.innerText = "Error: Something went wrong!";
+            }
+        });
+    </script>
 </body>
 </html>
