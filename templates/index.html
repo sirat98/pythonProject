@@ -55,19 +55,27 @@
                     body: formData
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
                 const data = await response.json(); // Assuming backend returns JSON
+                console.log("Backend Response:", data); // Debugging log
+
                 loadingText.style.display = "none";
 
-                if (data.success) {
+                if (data && data.result) {
                     predictionText.innerText = `Prediction: ${data.result}`;
                     uploadedImage.src = URL.createObjectURL(fileInput.files[0]);
                     uploadedImage.style.display = "block";
                 } else {
                     predictionText.innerText = "Error: Unable to classify.";
+                    console.error("Invalid response format:", data);
                 }
             } catch (error) {
                 loadingText.style.display = "none";
                 predictionText.innerText = "Error: Something went wrong!";
+                console.error("Fetch Error:", error);
             }
         });
     </script>
