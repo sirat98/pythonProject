@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
 import numpy as np
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU for TensorFlow
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from PIL import Image
